@@ -1,0 +1,20 @@
+name: "Fluxion Lab Versioning"
+description: "Versioning the deployment"
+outputs:
+  version:
+    description: "Version of the deployment"
+    value: ${{ steps.set-version.outputs.version }}
+runs:
+  using: "composite"
+  steps:
+    - name: Set version
+      id: set-version
+      shell: bash
+      run: |
+        if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+          version=${{ github.ref_name }}
+        else
+          git fetch --tags
+          version="$(git describe --tags `git rev-list --tags --max-count=1`)-$(git rev-parse --short=7 $GITHUB_SHA)"
+        fi
+        echo "version=$version" >> "$GITHUB_OUTPUT"
